@@ -1,0 +1,39 @@
+function predictStakeMineOutcome(serverSeed, hashSeed, nonce) {
+  const combinedInput = serverSeed + hashSeed + nonce;
+  const hashedInput = CryptoJS.SHA256(combinedInput).toString();
+  const firstEightHex = hashedInput.slice(0, 8);
+  const numericValue = parseInt(firstEightHex, 16);
+  const threshold = 0x10000000; // Hypothetical threshold
+
+  return {
+    willMine: numericValue < threshold,
+    randomNumber: numericValue.toString(16), // For potential debugging or display
+    threshold: threshold.toString(16)
+  };
+}
+
+function predictStakeMines() {
+  const serverSeed = document.getElementById("serverSeed").value;
+  const hashSeed = document.getElementById("hashSeed").value;
+  const noncesInput = document.getElementById("nonces").value;
+  const resultsContainer = document.getElementById("results-container");
+  const predictionOutput = document.getElementById("prediction-output");
+
+  if (!serverSeed || !hashSeed || !noncesInput) {
+    alert("Please enter all the required fields.");
+    return;
+  }
+
+  const nonces = noncesInput.split(/[\n,]+/).map(nonce => nonce.trim()).filter(nonce => nonce !== "");
+  resultsContainer.innerHTML = ""; // Clear previous results
+
+  nonces.forEach(nonce => {
+    const prediction = predictStakeMineOutcome(serverSeed, hashSeed, nonce);
+    const resultDiv = document.createElement("div");
+    resultDiv.classList.add("prediction-result");
+    resultDiv.innerHTML = `<strong>Nonce:</strong> ${nonce}<br><strong>Will Mine:</strong> ${prediction.willMine ? "Yes" : "No"}<br><strong>Random Number (Hex):</strong> ${prediction.randomNumber}<br><strong>Threshold (Hex):</strong> ${prediction.threshold}`;
+    resultsContainer.appendChild(resultDiv);
+  });
+
+  predictionOutput.style.display = "block";
+}
